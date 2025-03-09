@@ -162,6 +162,7 @@ const Vaults = () => {
               name="nombre"
               value={currentVault.nombre}
               onChange={handleModalChange}
+              maxLength="32"
               required
             />
           </div>
