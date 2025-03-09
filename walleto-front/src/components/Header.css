@@ -1,0 +1,19 @@
+.header {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 10px 20px;
+  }
+  
+  .header-logo {
+    width: 40px;      /* Ajusta el tamaño a tu gusto */
+    height: 40px;     /* Ajusta el tamaño a tu gusto */
+    margin-right: 10px;
+  }
+  
+  .header-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+  }
+  

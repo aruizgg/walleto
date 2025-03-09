@@ -1,0 +1,88 @@
+/* VaultModal.css */
+
+/* Fondo semitransparente cuando el modal está abierto */
+.custom-modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+
+    position: fixed;           /* Asegura que ocupe toda la ventana */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  
+  /* Color semitransparente sobre la capa difuminada */
+  background-color: rgba(0, 0, 0, 0.3);
+
+  /* Aplica el desenfoque de fondo */
+  backdrop-filter: blur(5px);
+  }
+  
+  /* Contenedor principal del modal */
+  .custom-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    outline: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Título del modal */
+  .custom-modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+  
+  /* Contenedor de campos del formulario */
+  .custom-modal-content form div {
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Inputs */
+  .custom-modal-content input,
+  .custom-modal-content select {
+    width: 100%;
+    padding: 8px;
+    font-size: 1rem;
+    margin-top: 4px;
+    box-sizing: border-box;
+  }
+  
+  /* Botones del modal */
+  .custom-modal-content button {
+    padding: 8px 16px;
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .custom-modal-content button[type="submit"] {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
+  
+  .custom-modal-content button[type="submit"]:hover {
+    background-color: #45a049;
+  }
+  
+  .custom-modal-content button[type="button"] {
+    background-color: #f2f2f2;
+    color: #333;
+    border: none;
+    border-radius: 4px;
+    margin-left: 10px;
+  }
+  
+  .custom-modal-content button[type="button"]:hover {
+    background-color: #e0e0e0;
+  }
+  

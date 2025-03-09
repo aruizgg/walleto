@@ -1,0 +1,21 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Degradado en tonos cyan -->
+    <linearGradient id="gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00bcd4" />
+      <stop offset="100%" stop-color="#00e5ff" />
+    </linearGradient>
+  </defs>
+
+  <!-- Círculo con borde oscuro -->
+  <circle cx="100" cy="100" r="90" fill="none" stroke="#0097a7" stroke-width="6" />
+  <circle cx="100" cy="100" r="90" fill="none" stroke="url(#gradient)" stroke-width="4" />
+
+  <!-- Línea curva con borde oscuro -->
+  <path d="M40,150 C70,110 130,90 160,50" fill="none" stroke="#0097a7" stroke-width="6" stroke-linecap="round" />
+  <path d="M40,150 C70,110 130,90 160,50" fill="none" stroke="url(#gradient)" stroke-width="4" stroke-linecap="round" />
+
+  <!-- Punto final con borde oscuro
+  <circle cx="160" cy="50" r="6" fill="#0097a7" />
+  <circle cx="160" cy="50" r="4" fill="url(#gradient)" /> -->
+</svg>
