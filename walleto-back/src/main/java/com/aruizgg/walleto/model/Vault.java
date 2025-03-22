@@ -13,27 +13,27 @@ public class Vault {
     private Long id;
 
     @Column(nullable = false)
-    private String nombre;
+    private String name;
 
     @Column(length = 255)
-    private String descripcion; // Campo opcional
+    private String description; // Campo opcional
 
     @Column(precision = 10, scale = 2, nullable = false)
-    private BigDecimal cantidad;
+    private BigDecimal amount;
 
     @Column(nullable = false)
-    private String moneda = "€"; // Valor por defecto
+    private String currency = "€"; // Valor por defecto
 
     // Constructores
     public Vault() {
     }
 
-    public Vault(String nombre, String descripcion, BigDecimal cantidad, String moneda) {
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-        this.cantidad = cantidad;
-        // Si no se proporciona moneda, se usará "€"
-        this.moneda = (moneda != null && !moneda.isEmpty()) ? moneda : "€";
+    public Vault(String name, String description, BigDecimal amount, String currency) {
+        this.name = name;
+        this.description = description;
+        this.amount = amount;
+        // Si no se proporciona currency, se usará "€"
+        this.currency = (currency != null && !currency.isEmpty()) ? currency : "€";
     }
 
     // Getters y setters
@@ -46,37 +46,37 @@ public class Vault {
         this.id = id;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getname() {
+        return name;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setname(String name) {
+        this.name = name;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public String getdescription() {
+        return description;
     }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
+    public void setdescription(String description) {
+        this.description = description;
     }
 
-    public BigDecimal getCantidad() {
-        return cantidad;
+    public BigDecimal getamount() {
+        return amount;
     }
 
-    public void setCantidad(BigDecimal cantidad) {
-        this.cantidad = cantidad;
+    public void setamount(BigDecimal amount) {
+        this.amount = amount;
     }
 
-    public String getMoneda() {
-        return moneda;
+    public String getcurrency() {
+        return currency;
     }
 
-    public void setMoneda(String moneda) {
+    public void setcurrency(String currency) {
         // Si se recibe un valor nulo o vacío, se establece el valor por defecto
-        this.moneda = (moneda != null && !moneda.isEmpty()) ? moneda : "€";
+        this.currency = (currency != null && !currency.isEmpty()) ? currency : "€";
     }
 }
 
