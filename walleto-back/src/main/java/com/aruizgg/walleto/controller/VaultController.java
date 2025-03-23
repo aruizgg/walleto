@@ -46,7 +46,7 @@ public class VaultController {
             transactionService.createIncome(newVault.getId(), vaultAmount, "Creación del Vault", new Date());
             return newVault;
         }
-        
+
         return vaultRepository.save(vault);
     }
 

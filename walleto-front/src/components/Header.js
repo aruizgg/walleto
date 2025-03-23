@@ -13,6 +13,7 @@ function Header() {
             <nav className="header-nav">
                 {location.pathname !== '/' && <Link to="/" className="header-button"> Home </Link>}
                 {location.pathname !== '/manage-vaults' && <Link to="/manage-vaults" className="header-button"> Manage Vaults </Link>}
+                {location.pathname !== '/transactions' && <Link to="/transactions" className="header-button"> Transactions </Link>}
             </nav>
         </header>
     );
