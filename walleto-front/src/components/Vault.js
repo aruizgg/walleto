@@ -55,10 +55,10 @@ const Vaults = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [currentVault, setCurrentVault] = useState({
         id: null,
-        nombre: '',
-        descripcion: '',
-        cantidad: '',
-        moneda: '€'
+        name: '',
+        description: '',
+        amount: '',
+        currency: '€',
     });
 
     useEffect(() => {
@@ -81,20 +81,20 @@ const Vaults = () => {
             setIsEditing(true);
             setCurrentVault({
                 id: vault.id,
-                nombre: vault.nombre,
-                descripcion: vault.descripcion,
-                cantidad: vault.cantidad, // se mantiene pero no se editará
-                moneda: vault.moneda
+                name: vault.name,
+                description: vault.description,
+                amount: vault.amount, // se mantiene pero no se editará
+                currency: vault.currency
             });
         } else {
             // Nuevo vault: se permite ingresar todos los campos.
             setIsEditing(false);
             setCurrentVault({
                 id: null,
-                nombre: '',
-                descripcion: '',
-                cantidad: '',
-                moneda: '€'
+                name: '',
+                description: '',
+                amount: '',
+                currency: '€'
             });
         }
         setModalIsOpen(true);
@@ -120,16 +120,16 @@ const Vaults = () => {
             if (isEditing) {
                 // Solo actualiza nombre, descripción y moneda
                 const updatedVault = {
-                    nombre: currentVault.nombre,
-                    descripcion: currentVault.descripcion,
-                    cantidad: currentVault.cantidad,
-                    moneda: currentVault.moneda
+                    name: currentVault.name,
+                    description: currentVault.description,
+                    amount: currentVault.amount,
+                    currency: currentVault.currency
                 };
                 await axios.put(`http://localhost:8080/api/vaults/${currentVault.id}`, updatedVault);
             } else {
                 const payload = {
                     ...currentVault,
-                    cantidad: parseFloat(currentVault.cantidad)
+                    cantidad: parseFloat(currentVault.amount)
                 };
                 await axios.post('http://localhost:8080/api/vaults', payload);
             }
@@ -167,11 +167,11 @@ const Vaults = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {vaults.map((vault) => (
+                    {vaults.filter(vault => !vault.deleted).map((vault) => (
                         <tr key={vault.id} >
-                            <td >{vault.nombre} </td>
-                            <td>{vault.descripcion}</td>
-                            <td>{vault.cantidad} {vault.moneda}</td>
+                            <td >{vault.name} </td>
+                            <td>{vault.description}</td>
+                            <td>{vault.amount} {vault.currency}</td>
                             <td className="acciones-col">
                                 <ActionButton
                                     onClick={() => openModal(vault)}
@@ -201,8 +201,8 @@ const Vaults = () => {
                         <label>Nombre: </label>
                         <input
                             type="text"
-                            name="nombre"
-                            value={currentVault.nombre}
+                            name="name"
+                            value={currentVault.name}
                             onChange={handleModalChange}
                             maxLength="32"
                             required
@@ -212,8 +212,8 @@ const Vaults = () => {
                         <label>Descripción: </label>
                         <input
                             type="text"
-                            name="descripcion"
-                            value={currentVault.descripcion}
+                            name="description"
+                            value={currentVault.description}
                             onChange={handleModalChange}
                             maxLength="255"
                         />
@@ -223,10 +223,10 @@ const Vaults = () => {
                         <label>Cantidad: </label>
                         <input
                             type="number"
-                            name="cantidad"
+                            name="amount"
                             step="0.01"
                             max="99999999.99"
-                            value={currentVault.cantidad}
+                            value={currentVault.amount}
                             onChange={handleModalChange}
                             disabled={isEditing}  // Deshabilita en edición
                             required
@@ -235,8 +235,8 @@ const Vaults = () => {
                     <div>
                         <label>Moneda: </label>
                         <select
-                            name="moneda"
-                            value={currentVault.moneda}
+                            name="currency"
+                            value={currentVault.currency}
                             onChange={handleModalChange}
                             required
                         >

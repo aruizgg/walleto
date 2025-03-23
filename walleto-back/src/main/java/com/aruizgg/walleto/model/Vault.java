@@ -24,6 +24,9 @@ public class Vault {
     @Column(nullable = false)
     private String currency = "€"; // Valor por defecto
 
+    @Column (nullable = false)
+    private boolean isDeleted = false;
+
     // Constructores
     public Vault() {
     }
@@ -46,37 +49,45 @@ public class Vault {
         this.id = id;
     }
 
-    public String getname() {
+    public String getName() {
         return name;
     }
 
-    public void setname(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public String getdescription() {
+    public String getDescription() {
         return description;
     }
 
-    public void setdescription(String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
-    public BigDecimal getamount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setamount(BigDecimal amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
-    public String getcurrency() {
+    public String getCurrency() {
         return currency;
     }
 
-    public void setcurrency(String currency) {
+    public void setCurrency(String currency) {
         // Si se recibe un valor nulo o vacío, se establece el valor por defecto
         this.currency = (currency != null && !currency.isEmpty()) ? currency : "€";
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
     }
 }
 

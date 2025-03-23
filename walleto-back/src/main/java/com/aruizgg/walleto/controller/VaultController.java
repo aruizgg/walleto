@@ -36,10 +36,10 @@ public class VaultController {
     public ResponseEntity<Vault> updateVault(@PathVariable Long id, @RequestBody Vault vaultDetails) {
         return vaultRepository.findById(id)
                 .map(vault -> {
-                    vault.setNombre(vaultDetails.getNombre());
-                    vault.setDescripcion(vaultDetails.getDescripcion());
-                    vault.setCantidad(vaultDetails.getCantidad());
-                    vault.setMoneda(vaultDetails.getMoneda());
+                    vault.setName(vaultDetails.getName());
+                    vault.setDescription(vaultDetails.getDescription());
+                    vault.setAmount(vaultDetails.getAmount());
+                    vault.setCurrency(vaultDetails.getCurrency());
                     Vault updatedVault = vaultRepository.save(vault);
                     return ResponseEntity.ok(updatedVault);
                 })
@@ -47,11 +47,12 @@ public class VaultController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteVault(@PathVariable Long id) {
+    public ResponseEntity<Vault> deleteVault(@PathVariable Long id) {
         return vaultRepository.findById(id)
                 .map(vault -> {
-                    vaultRepository.deleteById(id);
-                    return ResponseEntity.noContent().build();
+                    vault.setDeleted(true);
+                    Vault updatedVault = vaultRepository.save(vault);
+                    return ResponseEntity.ok(updatedVault);
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
