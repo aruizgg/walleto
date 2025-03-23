@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
@@ -125,9 +128,40 @@ public class TransactionService {
         transaction.setDescription(description);
         transaction.setVaultSource(vaultSource);
         transaction.setVaultDestination(vaultDestination);
-        transaction.setDate(date); transactionRepository.save(transaction);
+        transaction.setDate(date);
+        transactionRepository.save(transaction);
 
         return transaction;
+    }
+
+    public List<Transaction> getTransactionsByMonthAndYear(int month, int year) {
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
+
+        return transactionRepository.findByDateBetween(
+                Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+        );
+    }
+
+    public List<Transaction> getTransactionsByYear(int year) {
+        LocalDate startDate = LocalDate.of(year, 1, 1);
+        LocalDate endDate = LocalDate.of(year, 12, 31);
+
+        return transactionRepository.findByDateBetween(
+                Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+        );
+    }
+
+    public List<Integer> getAvailableTransactionYears() {
+        List<Date> transactionDates = transactionRepository.findDistinctYears();
+
+        return transactionDates.stream()
+                .map(date -> date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().getYear())
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
     }
 }
 
