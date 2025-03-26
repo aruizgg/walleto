@@ -43,6 +43,7 @@ const Transaction = () => {
     const [expandedYear, setExpandedYear] = useState(new Date().getFullYear()); // Año actual por defecto
     const [expandedMonth, setExpandedMonth] = useState(null);
     const [transactions, setTransactions] = useState([]);
+    const [yearTransactions, setYearTransactions] = useState([]); // Para mantener todas las transacciones del año
     const [loading, setLoading] = useState(false);
     const [vaultNames, setVaultNames] = useState({});
 
@@ -72,22 +73,27 @@ const Transaction = () => {
         }
     }, [expandedYear]);
 
+    const formatDate = (dateString) => {
+        const dateParts = dateString.split('T')[0].split('-');
+        const year = dateParts[0].substring(2); // Obtener solo los últimos 2 dígitos del año
+        const month = dateParts[1];
+        const day = dateParts[2];
+        return `${day}/${month}/${year}`;
+    };
+
     const fetchTransactionsForYear = async (year, month = null) => {
         setLoading(true);
         try {
-            let url = `http://localhost:8080/api/transactions/by-year?year=${year}`;
-            if (month !== null) {
-                url = `http://localhost:8080/api/transactions/by-month-year?month=${month}&year=${year}`;
+            // Primero, obtén todas las transacciones del año para mantener la referencia
+            const yearResponse = await fetch(`http://localhost:8080/api/transactions/by-year?year=${year}`);
+            if (!yearResponse.ok) {
+                throw new Error('Error al obtener las transacciones del año');
             }
-            
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error('Error al obtener las transacciones');
-            }
-            const data = await response.json();
+            const yearData = await yearResponse.json();
 
-            const transactionsWithVaultNames = await Promise.all(
-                data.map(async (transaction) => {
+            // Procesa y guarda todas las transacciones del año
+            const yearTransactionsWithNames = await Promise.all(
+                yearData.map(async (transaction) => {
                     const sourceVaultName = await fetchVaultName(transaction.vaultSource.id);
                     let destinationVaultName = '';
                     if (transaction.type === 'TRANSFER') {
@@ -100,10 +106,37 @@ const Transaction = () => {
                     };
                 })
             );
+            setYearTransactions(yearTransactionsWithNames);
 
-            setTransactions(transactionsWithVaultNames);
+            // Si se especificó un mes, obtén solo las transacciones de ese mes
             if (month !== null) {
-                setExpandedMonth(month); // Mantener el mes seleccionado visible
+                let url = `http://localhost:8080/api/transactions/by-month-year?month=${month}&year=${year}`;
+                const monthResponse = await fetch(url);
+                if (!monthResponse.ok) {
+                    throw new Error('Error al obtener las transacciones del mes');
+                }
+                const monthData = await monthResponse.json();
+
+                const monthTransactionsWithNames = await Promise.all(
+                    monthData.map(async (transaction) => {
+                        const sourceVaultName = await fetchVaultName(transaction.vaultSource.id);
+                        let destinationVaultName = '';
+                        if (transaction.type === 'TRANSFER') {
+                            destinationVaultName = await fetchVaultName(transaction.vaultDestination.id);
+                        }
+                        return {
+                            ...transaction,
+                            sourceVaultName,
+                            destinationVaultName,
+                        };
+                    })
+                );
+                setTransactions(monthTransactionsWithNames);
+                setExpandedMonth(month);
+            } else {
+                // Si no se especificó un mes, muestra todas las transacciones del año
+                setTransactions(yearTransactionsWithNames);
+                setExpandedMonth(null);
             }
         } catch (error) {
             console.error('Error:', error);
@@ -113,11 +146,14 @@ const Transaction = () => {
     };
 
     const handleYearClick = (year) => {
-        setExpandedYear((prevYear) => (prevYear === year ? null : year));
-        setExpandedMonth(null); // Resetear el mes expandido al cambiar de año
+        if (expandedYear !== year) {
+            setExpandedYear(year);
+            setExpandedMonth(null); // Resetear el mes expandido al cambiar de año
+        }
     };
 
-    const handleMonthClick = async (month, year) => {
+    const handleMonthClick = (month, year, event) => {
+        event.stopPropagation(); // Evita que el clic se propague al año
         fetchTransactionsForYear(year, month);
     };
 
@@ -125,7 +161,7 @@ const Transaction = () => {
         if (vaultNames[vaultId]) {
             return vaultNames[vaultId];
         }
-        
+
         try {
             const response = await fetch(`http://localhost:8080/api/vaults/${vaultId}`);
             if (!response.ok) {
@@ -144,16 +180,16 @@ const Transaction = () => {
     };
 
     const months = [
-        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
     ];
 
     const isMonthWithTransactions = (monthIndex) => {
-        if (transactions.length === 0) {
+        if (yearTransactions.length === 0) {
             return false;
         }
 
-        const transactionsForMonth = transactions.filter(transaction => {
+        const transactionsForMonth = yearTransactions.filter(transaction => {
             const transactionDate = new Date(transaction.date);
             return transactionDate.getMonth() === monthIndex && transactionDate.getFullYear() === expandedYear;
         });
@@ -162,7 +198,7 @@ const Transaction = () => {
     };
 
     return (
-        <div>
+        <div style={{ widht: "100%" }}>
             {error && <p>{error}</p>}
             <Table>
                 <tbody>
@@ -179,7 +215,7 @@ const Transaction = () => {
                                                         {months.map((month, i) => (
                                                             <ExpandedTableCell
                                                                 key={i}
-                                                                onClick={() => handleMonthClick(i + 1, year)}
+                                                                onClick={(e) => handleMonthClick(i + 1, year, e)}
                                                                 hasTransactions={isMonthWithTransactions(i)}
                                                                 isExpanded={expandedMonth === i + 1}
                                                             >
@@ -203,34 +239,115 @@ const Transaction = () => {
             {loading ? (
                 <LoadingMessage>Cargando transacciones...</LoadingMessage>
             ) : (
-                transactions.length > 0 && (
-                    <div>
-                        <Table>
-                            <thead>
-                                <tr>
-                                    <th>Tipo</th>
-                                    <th>Descripción</th>
-                                    <th>Cantidad</th>
-                                    <th>Vault de origen</th>
-                                    <th>Vault de destino</th>
-                                    <th>Dia</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {transactions.map((transaction) => (
-                                    <tr key={transaction.id}>
-                                        <td>{transaction.type}</td>
-                                        <td>{transaction.description}</td>
-                                        <td>{transaction.amount}</td>
-                                        <td>{transaction.sourceVaultName}</td>
-                                        <td>{transaction.type === 'TRANSFER' ? transaction.destinationVaultName : ''}</td>
-                                        <td>{transaction.date.split('T')[0].split('-')[2]}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    </div>
-                )
+                <div>
+                    {transactions.length > 0 ? (
+                        <div style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '100px',
+                            justifyContent: 'space-between'
+                        }}>
+                            {/* Tabla de INCOME */}
+                            <div style={{ flex: '1 1 30%', minWidth: '300px' }}>
+                                <h3>Ingresos</h3>
+                                {transactions.filter(t => t.type === 'INCOME').length > 0 ? (
+                                    <Table>
+                                        <thead>
+                                            <tr>
+                                                <th>Día</th>
+                                                <th>Vault</th>
+                                                <th>Descripción</th>
+                                                <th>Cantidad</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {transactions
+                                                .filter(transaction => transaction.type === 'INCOME')
+                                                .map((transaction) => (
+                                                    <tr key={transaction.id}>
+                                                        <td>{formatDate(transaction.date)}</td>
+                                                        <td>{transaction.sourceVaultName}</td>
+                                                        <td>{transaction.description}</td>
+                                                        <td>{transaction.amount + " " + transaction.vaultSource.currency}</td>
+                                                    </tr>
+                                                ))}
+                                        </tbody>
+                                    </Table>
+                                ) : (
+                                    <p>No hay ingresos este periodo</p>
+                                )}
+                            </div>
+
+                            {/* Tabla de EXPENSE */}
+                            <div style={{ flex: '1 1 30%', minWidth: '300px' }}>
+                                <h3>Gastos</h3>
+                                {transactions.filter(t => t.type === 'EXPENSE').length > 0 ? (
+                                    <Table>
+                                        <thead>
+                                            <tr>
+                                                <th>Día</th>
+                                                <th>Vault</th>
+                                                <th>Descripción</th>
+                                                <th>Cantidad</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {transactions
+                                                .filter(transaction => transaction.type === 'EXPENSE')
+                                                .map((transaction) => (
+                                                    <tr key={transaction.id}>
+                                                        <td>{formatDate(transaction.date)}</td>
+                                                        <td>{transaction.sourceVaultName}</td>
+                                                        <td>{transaction.description}</td>
+                                                        <td>{transaction.amount + " " + transaction.vaultSource.currency}</td>
+                                                    </tr>
+                                                ))}
+                                        </tbody>
+                                    </Table>
+                                ) : (
+                                    <p>No hay gastos este periodo</p>
+                                )}
+                            </div>
+
+                            {/* Tabla de TRANSFER */}
+                            <div style={{ flex: '1 1 30%', minWidth: '300px' }}>
+                                <h3>Transferencias</h3>
+                                {transactions.filter(t => t.type === 'TRANSFER').length > 0 ? (
+                                    <Table>
+                                        <thead>
+                                            <tr>
+                                            <th>Día</th>
+                                            <th>Origen</th>
+                                                <th>Destino</th>
+                                                <th>Descripción</th>
+                                                <th>Cantidad</th>              
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {transactions
+                                                .filter(transaction => transaction.type === 'TRANSFER')
+                                                .map((transaction) => (
+                                                    <tr key={transaction.id}>
+                                                        <td>{formatDate(transaction.date)}</td>
+                                                        <td>{transaction.sourceVaultName}</td>
+                                                        <td>{transaction.destinationVaultName}</td>
+                                                        <td>{transaction.description}</td>
+                                                        <td>{transaction.amount + " " + transaction.vaultSource.currency}</td>
+                                                    </tr>
+                                                ))}
+                                        </tbody>
+                                    </Table>
+                                ) : (
+                                    <p>No hay transferencias este periodo</p>
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        <p style={{ textAlign: 'center', margin: '20px 0', fontStyle: 'italic' }}>
+                            Aún no se han registrado transacciones este mes
+                        </p>
+                    )}
+                </div>
             )}
         </div>
     );
