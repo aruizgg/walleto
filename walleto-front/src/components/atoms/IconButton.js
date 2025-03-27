@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-const ActionButton = styled.button`
+const IconButton = styled.button`
     background-color:rgb(134, 201, 255);
     color: white;             
     padding: 10px 12px;        
@@ -27,12 +27,12 @@ const IconoAccion = styled.img`
   }
 `;
 
-function ComponentActionButton({ src, alt, onClick, ...props }) {
+function ComponentIconButton({ src, alt, onClick, ...props }) {
   return (
-    <ActionButton onClick={onClick} {...props} title={alt}>
+    <IconButton onClick={onClick} {...props} title={alt}>
       <IconoAccion src={src} />
-    </ActionButton>
+    </IconButton>
   );
 }
 
-export default ComponentActionButton;
+export default ComponentIconButton;

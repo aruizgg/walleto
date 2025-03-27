@@ -2,29 +2,9 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Modal from 'react-modal';
 import axios from 'axios';
+import TransactionButtons from '../components/molecules/TransactionButtons';
 
 Modal.setAppElement('#root');
-
-const ButtonContainer = styled.div`
-  margin-bottom: 20px;
-  display: flex;
-  gap: 10px;
-`;
-
-const ActionButton = styled.button`
-  padding: 10px 20px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #45a049;
-  }
-`;
 
 const Table = styled.table`
     border-collapse: collapse;
@@ -72,17 +52,6 @@ const Transaction = () => {
     const [loading, setLoading] = useState(false);
     const [vaultNames, setVaultNames] = useState({});
     const [vaults, setVaults] = useState([]);
-    
-    const [transactionModalOpen, setTransactionModalOpen] = useState(false);
-    const [transactionType, setTransactionType] = useState('');
-    const [transactionData, setTransactionData] = useState({
-        vaultId: '',
-        amount: '',
-        description: '',
-        date: '',
-        sourceVaultId: '',
-        destinationVaultId: ''
-    });
 
     useEffect(() => {
         const fetchVaults = async () => {
@@ -240,88 +209,21 @@ const Transaction = () => {
         return transactionsForMonth.length > 0;
     };
 
-    const openTransactionModal = (type) => {
-        const today = new Date().toISOString().slice(0, 10);
-        setTransactionType(type);
-        setTransactionData({
-            vaultId: '',
-            amount: '',
-            description: '',
-            date: today,
-            sourceVaultId: '',
-            destinationVaultId: ''
-        });
-        setTransactionModalOpen(true);
-    };
-
-    const closeTransactionModal = () => {
-        setTransactionModalOpen(false);
-    };
-
-    const handleTransactionChange = (e) => {
-        setTransactionData({
-            ...transactionData,
-            [e.target.name]: e.target.value
-        });
-    };
-
-    const handleTransactionSubmit = async (e) => {
-        e.preventDefault();
+    const fetchVaults = async () => {
         try {
-            if (transactionType === 'income') {
-                const payload = {
-                    vaultSourceId: transactionData.vaultId,
-                    amount: parseFloat(transactionData.amount),
-                    date: transactionData.date,
-                    description: transactionData.description
-                };
-                await axios.post('http://localhost:8080/api/transactions/income', payload);
-            } else if (transactionType === 'expense') {
-                const payload = {
-                    vaultSourceId: transactionData.vaultId,
-                    amount: parseFloat(transactionData.amount),
-                    date: transactionData.date,
-                    description: transactionData.description
-                };
-                await axios.post('http://localhost:8080/api/transactions/expense', payload);
-            } else if (transactionType === 'transfer') {
-                const payload = {
-                    vaultSourceId: transactionData.sourceVaultId,
-                    vaultDestinationId: transactionData.destinationVaultId,
-                    amount: parseFloat(transactionData.amount),
-                    date: transactionData.date,
-                    description: transactionData.description
-                };
-                await axios.post('http://localhost:8080/api/transactions/transfer', payload);
-            }
-            closeTransactionModal();
-            if (expandedYear) {
-                fetchTransactionsForYear(expandedYear, expandedMonth);
-            }
+          setLoading(true);
+          const response = await axios.get('http://localhost:8080/api/vaults');
+          setVaults(response.data);
+          setLoading(false);
         } catch (error) {
-            console.error('Error al enviar la transacción:', error);
+          console.error('Error al obtener vaults:', error);
+          setLoading(false);
         }
-    };
-
-    const handleAddIncome = () => {
-        openTransactionModal("income");
-    };
-
-    const handleAddExpense = () => {
-        openTransactionModal("expense");
-    };
-
-    const handleTransfer = () => {
-        openTransactionModal("transfer");
-    };
+      };
 
     return (
         <div style={{ width: "100%" }}>
-            <ButtonContainer>
-                <ActionButton onClick={handleAddIncome}>Añadir Ingreso</ActionButton>
-                <ActionButton onClick={handleAddExpense}>Añadir Gasto</ActionButton>
-                <ActionButton onClick={handleTransfer}>Transferir</ActionButton>
-            </ButtonContainer>
+            <TransactionButtons vaults={vaults} fetchVaults={fetchVaults} />
 
             {error && <p>{error}</p>}
             <Table>
@@ -473,151 +375,6 @@ const Transaction = () => {
                     )}
                 </div>
             )}
-
-             {/* Modal de transacción */}
-             <Modal
-                isOpen={transactionModalOpen}
-                onRequestClose={closeTransactionModal}
-                contentLabel="Transacción"
-                overlayClassName="custom-modal-overlay"
-                className="custom-modal-content"
-            >
-                <h3>
-                    {transactionType === 'income' && 'Añadir Ingreso'}
-                    {transactionType === 'expense' && 'Añadir Gasto'}
-                    {transactionType === 'transfer' && 'Transferir'}
-                </h3>
-                <form onSubmit={handleTransactionSubmit}>
-                    {(transactionType === 'income' || transactionType === 'expense') && (
-                        <>
-                            <div>
-                                <label>Selecciona Vault:</label>
-                                <select
-                                    name="vaultId"
-                                    value={transactionData.vaultId}
-                                    onChange={handleTransactionChange}
-                                    required
-                                >
-                                    <option value="">--Selecciona un Vault--</option>
-                                    {vaults
-                                        .filter(vault => !vault.deleted)
-                                        .map(vault => (
-                                            <option key={vault.id} value={vault.id}>
-                                                {vault.name}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label>Monto:</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    name="amount"
-                                    value={transactionData.amount}
-                                    onChange={handleTransactionChange}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label>Fecha:</label>
-                                <input
-                                    type="date"
-                                    name="date"
-                                    value={transactionData.date}
-                                    onChange={handleTransactionChange}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label>Descripción:</label>
-                                <input
-                                    type="text"
-                                    name="description"
-                                    value={transactionData.description}
-                                    onChange={handleTransactionChange}
-                                />
-                            </div>
-                        </>
-                    )}
-                    {transactionType === 'transfer' && (
-                        <>
-                            <div>
-                                <label>Vault Origen:</label>
-                                <select
-                                    name="sourceVaultId"
-                                    value={transactionData.sourceVaultId}
-                                    onChange={handleTransactionChange}
-                                    required
-                                >
-                                    <option value="">--Selecciona Vault Origen--</option>
-                                    {vaults
-                                        .filter(vault => !vault.deleted)
-                                        .map(vault => (
-                                            <option key={vault.id} value={vault.id}>
-                                                {vault.name}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label>Vault Destino:</label>
-                                <select
-                                    name="destinationVaultId"
-                                    value={transactionData.destinationVaultId}
-                                    onChange={handleTransactionChange}
-                                    required
-                                >
-                                    <option value="">--Selecciona Vault Destino--</option>
-                                    {vaults
-                                        .filter(vault => !vault.deleted)
-                                        .map(vault => (
-                                            <option key={vault.id} value={vault.id}>
-                                                {vault.name}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label>Monto:</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    name="amount"
-                                    value={transactionData.amount}
-                                    onChange={handleTransactionChange}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label>Fecha:</label>
-                                <input
-                                    type="date"
-                                    name="date"
-                                    value={transactionData.date}
-                                    onChange={handleTransactionChange}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label>Descripción:</label>
-                                <input
-                                    type="text"
-                                    name="description"
-                                    value={transactionData.description}
-                                    onChange={handleTransactionChange}
-                                />
-                            </div>
-                        </>
-                    )}
-                    <div style={{ marginTop: '10px' }}>
-                        <button type="submit">Enviar</button>
-                        <button type="button" onClick={closeTransactionModal} style={{ marginLeft: '10px' }}>
-                            Cancelar
-                        </button>
-                    </div>
-                </form>
-            </Modal>
         </div>
     );
 };

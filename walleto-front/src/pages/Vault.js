@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Modal from 'react-modal';
-import basura from '../assets/basura.svg';
-import lapiz from '../assets/lapiz.svg';
-import agregar from '../assets/agregar.svg';
-import '../App.css';
-import ActionButton from './ActionButton';
+import basura from '../assets/svg/basura.svg';
+import lapiz from '../assets/svg/lapiz.svg';
+import agregar from '../assets/svg/agregar.svg';
+import '../styles/App.css';
+import ActionButton from '../components/atoms/IconButton';
 import styled from 'styled-components';
-import './VaultModal.css';  // Importa el modal separado
+import '../styles/VaultModal.css';  // Importa el modal separado
 
 
 // Configura el elemento raíz para accesibilidad

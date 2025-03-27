@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import DolarToEuro from '../utils/DolarToEuro';
-import TransactionButtons from './TransactionButtons';
+import DolarToEuro from '../lib/utils/DolarToEuro';
+import TransactionButtons from '../components/molecules/TransactionButtons';
 
 const PanelContainer = styled.div`
   display: flex;
