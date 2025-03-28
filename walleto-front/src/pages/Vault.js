@@ -5,7 +5,7 @@ import basura from '../assets/svg/basura.svg';
 import lapiz from '../assets/svg/lapiz.svg';
 import agregar from '../assets/svg/agregar.svg';
 import '../styles/App.css';
-import ActionButton from '../components/atoms/IconButton';
+import ActionButton from '../components/atoms/Buttons/IconButton';
 import styled from 'styled-components';
 import '../styles/VaultModal.css';  // Importa el modal separado
 

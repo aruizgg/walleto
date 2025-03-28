@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import styled from 'styled-components';
-import DolarToEuro from '../lib/utils/DolarToEuro';
 import TransactionButtons from '../components/molecules/TransactionButtons';
+import VaultService from '../services/VaultService';
+import CurrencyConverter from '../lib/utils/CurrencyConverter';
 
 const PanelContainer = styled.div`
   display: flex;
@@ -45,12 +45,12 @@ const MainPanel = () => {
   const [showDropdown, setShowDropdown] = useState(false);
 
   // Tasa de conversión de dólares a euros
-  const conversionRate = DolarToEuro();
+  const conversionRate = CurrencyConverter.DolarToEuro();
 
   const fetchVaults = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:8080/api/vaults');
+      const response = await VaultService.fetchVaults();
       setVaults(response.data);
       setLoading(false);
     } catch (error) {

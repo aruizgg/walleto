@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logo from '../../assets/svg/logo.svg';
 import '../../styles/Header.css';
-import ComponentTextButton from '../atoms/TextButton';
+import ComponentTextButton from '../atoms/Buttons/TextButton';
 
 function Header() {
     const location = useLocation();
